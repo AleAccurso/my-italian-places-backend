@@ -32,9 +32,10 @@ CREATE TABLE IF NOT EXISTS place_categories (
 	deleted_at TIMESTAMP,
 	category_name VARCHAR(64) NOT NULL,
 	category_key VARCHAR(64) NOT NULL,
-	icon_url VARCHAR(256) NOT NULL
+	icon_url VARCHAR(256) NOT NULL,
+
+	CONSTRAINT name_key_icon_unique UNIQUE (category_name, category_key, icon_url)
 );
-ALTER TABLE place_categories ADD CONSTRAINT name_key_icon_unique UNIQUE (category_name, category_key, icon_url);
 
 CREATE TABLE IF NOT EXISTS places (
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -46,10 +47,11 @@ CREATE TABLE IF NOT EXISTS places (
 	address_id uuid NOT NULL,
 	latitude float4 NOT NULL,
 	longitude float4 NOT NULL,
-	accessible_by VARCHAR(32)
+	accessible_by VARCHAR(32),
+
+	CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES place_categories (id),
+	CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES addresses (id)
 );
-ALTER TABLE places ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES place_categories (id);
-ALTER TABLE places ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES addresses (id);
 
 CREATE TABLE IF NOT EXISTS users (
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -62,21 +64,23 @@ CREATE TABLE IF NOT EXISTS users (
 	phone_number VARCHAR(64) NOT NULL,
 	address_id uuid NOT NULL,
 	role VARCHAR(50) NOT NULL,
-	external_id VARCHAR(50) NOT NULL
-);
-ALTER TABLE users ADD CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES addresses (id);
-ALTER TABLE users ADD CONSTRAINT email_phone_unique UNIQUE (email, phone_number);
+	external_id VARCHAR(50) NOT NULL,
 
-CREATE TABLE IF NOT EXISTS shared_places (
+	CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES addresses (id),
+	CONSTRAINT email_phone_unique UNIQUE (email, phone_number)
+);
+
+CREATE TABLE IF NOT EXISTS share_places (
 	id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
 	created_at TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL,
 	deleted_at TIMESTAMP,
 	user_id uuid NOT NULL,
-	place_id uuid NOT NULL
+	place_id uuid NOT NULL,
+
+	CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id),
+	CONSTRAINT fk_place FOREIGN KEY (place_id) REFERENCES places (id)
 );
-ALTER TABLE shared_places ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id);
-ALTER TABLE shared_places ADD CONSTRAINT fk_place FOREIGN KEY (place_id) REFERENCES places (id);
 
 --
 -- PostgreSQL database dump complete
