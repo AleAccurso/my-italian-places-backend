@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS places (
 	latitude float4 NOT NULL,
 	longitude float4 NOT NULL,
 	accessible_by VARCHAR(32),
+	archived_at TIMESTAMP,
 
 	CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES place_categories (id),
 	CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES addresses (id)
